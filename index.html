@@ -1,17 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Prototype Website</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
-        h1 { color: #333; }
-        p { color: #666; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clinical Food & Health Risk Assessment — dietary, lifestyle and blood pressure assessment tool.">
+  <meta name="theme-color" content="#162a36">
+  <title>Clinical Food & Health Risk Predictor</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Welcome to My Prototype Website</h1>
-    <p>This site is live and powered by GitHub and Cloudflare Pages!</p>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-title">CLINICAL</div>
+        <div class="brand-subtitle">FOOD &amp; HEALTH</div>
+      </div>
+
+      <nav class="step-nav" aria-label="Assessment sections">
+        <button class="nav-item active" data-page="vitals">
+          <span class="nav-number">01</span><span>Patient Profile</span>
+        </button>
+        <button class="nav-item" data-page="meals">
+          <span class="nav-number">02</span><span>FFQ Dietary Intake</span>
+        </button>
+        <button class="nav-item" data-page="lifestyle">
+          <span class="nav-number">03</span><span>History &amp; Lifestyle</span>
+        </button>
+        <button class="nav-item" data-page="results">
+          <span class="nav-number">04</span><span>Assessment Results</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-dot"></div>
+        <span>Local browser application</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
+        <div>
+          <h1 id="pageTitle">Patient Profile</h1>
+          <p id="pageSubtitle">Demographics and baseline clinical measurements</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="patient-chip" id="patientChip">PID-0001</span>
+          <button class="ghost-btn" id="newAssessmentBtn">New Assessment</button>
+        </div>
+      </header>
+
+      <div class="progress-wrap">
+        <div class="progress-line"><span id="progressBar"></span></div>
+        <span id="progressText">Step 1 of 3</span>
+      </div>
+
+      <section class="page active" id="page-vitals">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="eyebrow">01 / PATIENT PROFILE</span>
+              <h2>Baseline measurements</h2>
+              <p>Enter the participant's demographic and clinical measurements.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>Participant ID <small>Auto-generated</small></span>
+              <input id="participant" type="text" readonly>
+            </label>
+            <label class="field">
+              <span>Age <small>years</small></span>
+              <input id="age" type="number" min="1" max="120" inputmode="numeric" placeholder="e.g. 40">
+            </label>
+
+            <div class="field">
+              <span>Gender</span>
+              <div class="option-group" data-name="gender">
+                <button class="option selected" data-value="Male">Male</button>
+                <button class="option" data-value="Female">Female</button>
+              </div>
+            </div>
+            <label class="field">
+              <span>Height <small>cm</small></span>
+              <input id="height" type="number" min="30" max="250" step="0.1" placeholder="e.g. 170">
+            </label>
+
+            <label class="field">
+              <span>Weight <small>kg</small></span>
+              <input id="weight" type="number" min="1" max="400" step="0.1" placeholder="e.g. 70">
+            </label>
+            <label class="field">
+              <span>Calculated BMI</span>
+              <input id="bmi" type="text" readonly placeholder="Calculated automatically">
+            </label>
+
+            <label class="field">
+              <span>Systolic BP <small>mmHg</small></span>
+              <input id="sysBP" type="number" min="50" max="300" step="1" placeholder="e.g. 120">
+            </label>
+            <label class="field">
+              <span>Diastolic BP <small>mmHg</small></span>
+              <input id="diaBP" type="number" min="30" max="200" step="1" placeholder="e.g. 80">
+            </label>
+
+            <label class="field">
+              <span>Waist Circumference <small>cm</small></span>
+              <input id="waist" type="number" min="30" max="250" step="0.1" placeholder="e.g. 90">
+            </label>
+            <label class="field">
+              <span>Fasting Blood Sugar <small>mg/dL</small></span>
+              <input id="fbs" type="number" min="20" max="600" step="0.1" placeholder="e.g. 95">
+            </label>
+          </div>
+
+          <div class="info-banner">
+            <span class="info-icon">i</span>
+            <div><strong>Data quality</strong><br>Use measured values where available. BMI is calculated from height and weight.</div>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <button class="primary-btn" data-next="meals">Continue <span>→</span></button>
+        </div>
+      </section>
+
+      <section class="page" id="page-meals">
+        <div class="card ffq-card">
+          <div class="card-header">
+            <div>
+              <span class="eyebrow">02 / FFQ DIETARY INTAKE</span>
+              <h2>Food frequency questionnaire</h2>
+              <p>Select one frequency/portion option for every item.</p>
+            </div>
+            <div class="score-preview">FFQ score <strong id="liveScore">0.0</strong></div>
+          </div>
+
+          <div id="ffqContainer"></div>
+
+          <div class="subsection">
+            <div class="section-band">5. ADDITIONAL CLINICAL QUESTIONS — STOMA ASSESSMENT</div>
+            <div class="stoma-box">
+              <div class="question-title">Does the patient have a stoma (Ileostomy or Colostomy)?</div>
+              <div class="stoma-grid">
+                <div>
+                  <span class="mini-label">Stoma Present</span>
+                  <div class="option-group compact" data-name="stomaHas">
+                    <button class="option selected" data-value="NO">NO</button>
+                    <button class="option" data-value="YES">YES</button>
+                  </div>
+                </div>
+                <div>
+                  <span class="mini-label">Specify Type</span>
+                  <div class="option-group compact" data-name="stomaType">
+                    <button class="option selected" data-value="None">None</button>
+                    <button class="option" data-value="Ileostomy">Ileostomy</button>
+                    <button class="option" data-value="Colostomy">Colostomy</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <button class="secondary-btn" data-back="vitals">← Back</button>
+          <button class="primary-btn" data-next="lifestyle">Continue <span>→</span></button>
+        </div>
+      </section>
+
+      <section class="page" id="page-lifestyle">
+        <div class="lifestyle-grid">
+          <div class="card">
+            <div class="card-header small">
+              <div><span class="eyebrow">MEDICAL HISTORY</span><h2>Medical &amp; family history</h2></div>
+            </div>
+            <div class="stack-fields">
+              <div class="field"><span>Family diabetes</span><div class="option-group" data-name="famDiabetes"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
+              <div class="field"><span>Family hypertension</span><div class="option-group" data-name="famHypertension"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
+              <div class="field"><span>Family heart disease</span><div class="option-group" data-name="famHeart"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
+              <div class="field"><span>Personal prior diagnosis</span><div class="option-group" data-name="personalDiag"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header small">
+              <div><span class="eyebrow">LIFESTYLE</span><h2>Lifestyle factors</h2></div>
+            </div>
+            <div class="stack-fields">
+              <div class="field"><span>Vigorous exercise</span><div class="option-group" data-name="exVigorous"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
+              <div class="field"><span>Moderate exercise</span><div class="option-group" data-name="exModerate"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
+              <div class="field"><span>Walking exercise</span><div class="option-group" data-name="exWalking"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
+              <div class="field"><span>Smoking status</span><div class="option-group wrap-options" data-name="smoking"><button class="option selected" data-value="Never smoked">Never smoked</button><button class="option" data-value="Former smoker">Former smoker</button><button class="option" data-value="Current smoker">Current smoker</button></div></div>
+              <div class="field"><span>Alcohol consumption</span><div class="option-group wrap-options" data-name="alcohol"><button class="option selected" data-value="Never">Never</button><button class="option" data-value="Occasional">Occasional</button><button class="option" data-value="Regular/Heavy">Regular/Heavy</button></div></div>
+              <div class="field"><span>Extra salt added</span><div class="option-group wrap-options" data-name="extraSalt"><button class="option selected" data-value="Never">Never</button><button class="option" data-value="Rarely">Rarely</button><button class="option" data-value="Sometimes">Sometimes</button><button class="option" data-value="Often">Often</button><button class="option" data-value="Always">Always</button></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <button class="secondary-btn" data-back="meals">← Back</button>
+          <button class="primary-btn" id="runAssessment">Run Assessment &amp; Save <span>→</span></button>
+        </div>
+      </section>
+
+      <section class="page" id="page-results">
+        <div id="resultsEmpty" class="card empty-results">
+          <div class="empty-icon">⌁</div>
+          <h2>No assessment run yet</h2>
+          <p>Complete the first three sections and run the assessment to see the results.</p>
+          <button class="primary-btn" data-next="vitals">Start Assessment</button>
+        </div>
+
+        <div id="resultsContent" hidden>
+          <div class="stats-grid" id="statsGrid"></div>
+
+          <div class="results-grid">
+            <div class="card">
+              <div class="card-header small">
+                <div><span class="eyebrow">RISK PROFILE</span><h2>Estimated disease risks</h2></div>
+              </div>
+              <div id="riskList" class="risk-list"></div>
+              <div class="result-note">Risk values are estimates generated from the assessment logic and are not a diagnosis.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-header small">
+                <div><span class="eyebrow">HEALTHCARE COMPANION</span><h2>Personalized action plan</h2><p>Recommendations based on the entered measurements, FFQ responses and lifestyle factors.</p></div>
+              </div>
+              <div id="suggestions" class="suggestions"></div>
+            </div>
+          </div>
+
+          <div class="card result-footer-card">
+            <div>
+              <strong>Assessment saved locally</strong>
+              <p id="saveStatus">This browser stores the latest assessment and can export records as CSV.</p>
+            </div>
+            <div class="result-actions">
+              <button class="secondary-btn" id="exportBtn">Export CSV</button>
+              <button class="primary-btn" id="tryAgainBtn">↻ Start New Assessment</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <span>Clinical Food &amp; Health Assessment</span>
+        <span>For research/educational decision support — not a substitute for professional medical diagnosis.</span>
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
 </body>
 </html>
+
