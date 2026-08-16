@@ -1,3 +1,7 @@
+/* =========================================================
+   HALOS CLINICAL ASSESSMENT — CORE SYSTEM
+========================================================= */
+
 const FFQ = [
   {
     key: "carbs_staples",
@@ -12,7 +16,6 @@ const FFQ = [
       "5+/day": 30
     }
   },
-
   {
     key: "ready_cereals",
     section: "2. Cereals, Bakery & Biscuits",
@@ -26,13 +29,11 @@ const FFQ = [
       Daily: 5
     }
   },
-
   {
     key: "sweet_bakery",
     section: "2. Cereals, Bakery & Biscuits",
     name: "Sweet biscuits & bakery foods",
-    examples:
-      "Sweet pastries, bakery cakes, sweet buns, doughnuts",
+    examples: "Sweet pastries, bakery cakes, sweet buns, doughnuts",
     options: {
       "Rarely/Never": 0,
       "1x/wk": 2,
@@ -40,7 +41,6 @@ const FFQ = [
       Daily: 5
     }
   },
-
   {
     key: "savoury_biscuits",
     section: "2. Cereals, Bakery & Biscuits",
@@ -53,13 +53,11 @@ const FFQ = [
       Daily: 5
     }
   },
-
   {
     key: "cheeses",
     section: "2. Cereals, Bakery & Biscuits",
     name: "Cheeses",
-    examples:
-      "Commercial block or sliced cheeses (excludes paneer/curd)",
+    examples: "Commercial block or sliced cheeses (excludes paneer/curd)",
     options: {
       "Rarely/Never": 0,
       "1x/wk": 4,
@@ -67,7 +65,6 @@ const FFQ = [
       Daily: 12
     }
   },
-
   {
     key: "sambols_pastes",
     section: "3. Spreads, Soups & Processed Foods",
@@ -81,7 +78,6 @@ const FFQ = [
       Daily: 2
     }
   },
-
   {
     key: "instant_soups",
     section: "3. Spreads, Soups & Processed Foods",
@@ -95,13 +91,11 @@ const FFQ = [
       Daily: 3
     }
   },
-
   {
     key: "processed_meats",
     section: "3. Spreads, Soups & Processed Foods",
     name: "Processed meats & preserved fish",
-    examples:
-      "Sausages/processed meat, Dried fish (Karawala)",
+    examples: "Sausages/processed meat, Dried fish (Karawala)",
     options: {
       "Rarely/Never": 0,
       "1x/wk": 10,
@@ -109,7 +103,6 @@ const FFQ = [
       Daily: 30
     }
   },
-
   {
     key: "cooking_sauces",
     section: "3. Spreads, Soups & Processed Foods",
@@ -123,7 +116,6 @@ const FFQ = [
       Daily: 10
     }
   },
-
   {
     key: "salt_cooking",
     section: "4. Salt Addition, Condiments & Fast Food",
@@ -137,7 +129,6 @@ const FFQ = [
       Daily: 25
     }
   },
-
   {
     key: "salt_table",
     section: "4. Salt Addition, Condiments & Fast Food",
@@ -151,7 +142,6 @@ const FFQ = [
       Daily: 12
     }
   },
-
   {
     key: "table_condiments",
     section: "4. Salt Addition, Condiments & Fast Food",
@@ -165,7 +155,6 @@ const FFQ = [
       Daily: 5
     }
   },
-
   {
     key: "fast_food",
     section: "4. Salt Addition, Condiments & Fast Food",
@@ -231,23 +220,33 @@ const pageMeta = {
 
 let lastReport = null;
 
-
 /* =========================================================
-   BASIC HELPERS
+   BASIC HELPERS & TOAST
 ========================================================= */
 
 function id(name) {
   return document.getElementById(name);
 }
 
+function toast(message) {
+  const toastElement = id("toast");
+  if (!toastElement) return;
+
+  toastElement.textContent = message;
+  toastElement.classList.add("show");
+
+  clearTimeout(window._toast);
+  window._toast = setTimeout(() => {
+    toastElement.classList.remove("show");
+  }, 2800);
+}
 
 /* =========================================================
    AUTOMATIC PARTICIPANT ID
 ========================================================= */
 
-function patientId() {
+function generatePatientId() {
   const now = new Date();
-
   const stamp = [
     now.getFullYear().toString().slice(-2),
     String(now.getMonth() + 1).padStart(2, "0"),
@@ -258,50 +257,42 @@ function patientId() {
   ].join("");
 
   const random = Math.floor(100 + Math.random() * 900);
-
   return `PID-${stamp}-${random}`;
 }
 
 function initId() {
-  const pid = patientId();
+  const pid = generatePatientId();
+  const participantInput = id("participant");
+  const patientChip = id("patientChip");
 
-  id("participant").value = pid;
-  id("patientChip").textContent = pid;
+  if (participantInput) participantInput.value = pid;
+  if (patientChip) patientChip.textContent = pid;
 }
 
-
 /* =========================================================
-   FFQ GENERATION
+   FFQ GENERATION & SCORING
 ========================================================= */
 
 function renderFFQ() {
   const root = id("ffqContainer");
-
   if (!root) return;
 
   root.innerHTML = "";
-
   let currentSection = "";
 
   FFQ.forEach(item => {
     if (item.section !== currentSection) {
       currentSection = item.section;
-
       const section = document.createElement("div");
       section.className = "ffq-section";
-
       section.innerHTML = `
-        <div class="section-band">
-          ${item.section.toUpperCase()}
-        </div>
-
+        <div class="section-band">${item.section.toUpperCase()}</div>
         <div class="ffq-head">
           <div>Food Category</div>
           <div>Sri Lankan Food Examples</div>
           <div>Frequency / Portion Option (Select ONE)</div>
         </div>
       `;
-
       root.appendChild(section);
     }
 
@@ -310,14 +301,11 @@ function renderFFQ() {
     }
 
     const row = document.createElement("div");
-
     row.className = "ffq-row";
 
     const optionsHTML = Object.keys(item.options)
       .map(label => {
-        const selected =
-          state.ffq[item.key] === label ? "selected" : "";
-
+        const selected = state.ffq[item.key] === label ? "selected" : "";
         return `
           <button
             type="button"
@@ -332,23 +320,9 @@ function renderFFQ() {
       .join("");
 
     row.innerHTML = `
-      <div>
-        <div class="food-name">
-          ${item.name}
-        </div>
-      </div>
-
-      <div>
-        <div class="food-examples">
-          ${item.examples}
-        </div>
-      </div>
-
-      <div>
-        <div class="ffq-options">
-          ${optionsHTML}
-        </div>
-      </div>
+      <div><div class="food-name">${item.name}</div></div>
+      <div><div class="food-examples">${item.examples}</div></div>
+      <div><div class="ffq-options">${optionsHTML}</div></div>
     `;
 
     root.appendChild(row);
@@ -357,7 +331,6 @@ function renderFFQ() {
   if (!root.dataset.bound) {
     root.addEventListener("click", event => {
       const button = event.target.closest("[data-ffq]");
-
       if (!button) return;
 
       const key = button.dataset.ffq;
@@ -365,14 +338,9 @@ function renderFFQ() {
 
       state.ffq[key] = value;
 
-      root
-        .querySelectorAll(`[data-ffq="${key}"]`)
-        .forEach(option => {
-          option.classList.toggle(
-            "selected",
-            option === button
-          );
-        });
+      root.querySelectorAll(`[data-ffq="${key}"]`).forEach(option => {
+        option.classList.toggle("selected", option === button);
+      });
 
       updateScore();
     });
@@ -381,18 +349,12 @@ function renderFFQ() {
   }
 }
 
-
-/* =========================================================
-   FFQ SCORE
-========================================================= */
-
 function updateScore() {
   const score = FFQ.reduce((total, item) => {
     return total + (item.options[state.ffq[item.key]] || 0);
   }, 0);
 
   const scoreElement = id("liveScore");
-
   if (scoreElement) {
     scoreElement.textContent = score.toFixed(1);
   }
@@ -400,125 +362,69 @@ function updateScore() {
   return score;
 }
 
-
 /* =========================================================
    OPTION BUTTON GROUPS
 ========================================================= */
 
 function wireOptionGroups() {
-  document
-    .querySelectorAll(".option-group")
-    .forEach(group => {
+  document.querySelectorAll(".option-group").forEach(group => {
+    if (group.dataset.bound === "true") return;
 
-      if (group.dataset.bound === "true") {
-        return;
-      }
+    group.addEventListener("click", event => {
+      const button = event.target.closest(".option");
+      if (!button) return;
 
-      group.addEventListener("click", event => {
-        const button =
-          event.target.closest(".option");
+      event.preventDefault();
 
-        if (!button) return;
-
-        event.preventDefault();
-
-        group
-          .querySelectorAll(".option")
-          .forEach(option => {
-            option.classList.remove("selected");
-          });
-
-        button.classList.add("selected");
-
-        const name = group.dataset.name;
-
-        if (name) {
-          state[name] = button.dataset.value;
-        }
+      group.querySelectorAll(".option").forEach(option => {
+        option.classList.remove("selected");
       });
 
-      group.dataset.bound = "true";
+      button.classList.add("selected");
+
+      const name = group.dataset.name;
+      if (name) {
+        state[name] = button.dataset.value;
+      }
     });
+
+    group.dataset.bound = "true";
+  });
 }
 
-
 /* =========================================================
-   BMI CALCULATION
+   BMI CALCULATION & LISTENERS
 ========================================================= */
 
 function calcBMI() {
-  const height =
-    Number.parseFloat(id("height").value);
-
-  const weight =
-    Number.parseFloat(id("weight").value);
-
+  const heightInput = id("height");
+  const weightInput = id("weight");
   const bmiField = id("bmi");
 
-  if (!bmiField) return;
+  if (!heightInput || !weightInput || !bmiField) return;
 
-  if (
-    Number.isFinite(height) &&
-    Number.isFinite(weight) &&
-    height > 0 &&
-    weight > 0
-  ) {
-    const bmi =
-      weight /
-      Math.pow(height / 100, 2);
+  const height = Number.parseFloat(heightInput.value);
+  const weight = Number.parseFloat(weightInput.value);
 
+  if (Number.isFinite(height) && Number.isFinite(weight) && height > 0 && weight > 0) {
+    const bmi = weight / Math.pow(height / 100, 2);
     bmiField.value = bmi.toFixed(1);
   } else {
     bmiField.value = "";
   }
 }
 
-
-/* =========================================================
-   BMI EVENT LISTENERS
-========================================================= */
-
 function attachBMIListeners() {
-  const heightField = id("height");
-  const weightField = id("weight");
-
-  if (heightField) {
-    heightField.addEventListener(
-      "input",
-      calcBMI
-    );
-
-    heightField.addEventListener(
-      "change",
-      calcBMI
-    );
-
-    heightField.addEventListener(
-      "blur",
-      calcBMI
-    );
-  }
-
-  if (weightField) {
-    weightField.addEventListener(
-      "input",
-      calcBMI
-    );
-
-    weightField.addEventListener(
-      "change",
-      calcBMI
-    );
-
-    weightField.addEventListener(
-      "blur",
-      calcBMI
-    );
-  }
-
+  ["height", "weight"].forEach(fieldId => {
+    const field = id(fieldId);
+    if (field) {
+      field.addEventListener("input", calcBMI);
+      field.addEventListener("change", calcBMI);
+      field.addEventListener("blur", calcBMI);
+    }
+  });
   calcBMI();
 }
-
 
 /* =========================================================
    PAGE NAVIGATION
@@ -526,518 +432,256 @@ function attachBMIListeners() {
 
 function showPage(key) {
   const targetPage = id(`page-${key}`);
+  if (!targetPage) return;
 
-  if (!targetPage) {
-    console.error("Page not found:", key);
-    return;
-  }
-
-  document
-    .querySelectorAll(".page")
-    .forEach(page => {
-      page.classList.remove("active");
-    });
-
+  document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
   targetPage.classList.add("active");
 
-  document
-    .querySelectorAll(".nav-item")
-    .forEach(button => {
-      button.classList.toggle(
-        "active",
-        button.dataset.page === key
-      );
-    });
+  document.querySelectorAll(".nav-item").forEach(button => {
+    button.classList.toggle("active", button.dataset.page === key);
+  });
 
   if (pageMeta[key]) {
-    id("pageTitle").textContent =
-      pageMeta[key][0];
-
-    id("pageSubtitle").textContent =
-      pageMeta[key][1];
+    const titleEl = id("pageTitle");
+    const subTitleEl = id("pageSubtitle");
+    if (titleEl) titleEl.textContent = pageMeta[key][0];
+    if (subTitleEl) subTitleEl.textContent = pageMeta[key][1];
   }
 
-  const step =
-    key === "vitals"
-      ? 1
-      : key === "meals"
-      ? 2
-      : key === "lifestyle"
-      ? 3
-      : 4;
+  const step = key === "vitals" ? 1 : key === "meals" ? 2 : key === "lifestyle" ? 3 : 4;
+  const progressWidth = key === "results" ? 100 : (step / 3) * 100;
 
-  const progressWidth =
-    key === "results"
-      ? 100
-      : (step / 3) * 100;
+  const progressBar = id("progressBar");
+  const progressText = id("progressText");
 
-  id("progressBar").style.width =
-    `${progressWidth}%`;
-
-  id("progressText").textContent =
-    key === "results"
-      ? "Completed"
-      : `Step ${step} of 3`;
+  if (progressBar) progressBar.style.width = `${progressWidth}%`;
+  if (progressText) {
+    progressText.textContent = key === "results" ? "Completed" : `Step ${step} of 3`;
+  }
 
   const sidebar = id("sidebar");
+  if (sidebar) sidebar.classList.remove("open");
 
-  if (sidebar) {
-    sidebar.classList.remove("open");
-  }
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
-
-
-/* =========================================================
-   CONTINUE BUTTONS
-========================================================= */
 
 function wireNavigationButtons() {
-
-  document
-    .querySelectorAll("[data-next]")
-    .forEach(button => {
-
-      if (button.dataset.navBound === "true") {
-        return;
-      }
-
-      button.addEventListener("click", event => {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const target =
-          button.dataset.next;
-
-        if (target) {
-          showPage(target);
-        }
-
-      });
-
-      button.dataset.navBound = "true";
+  document.querySelectorAll("[data-next]").forEach(button => {
+    if (button.dataset.navBound === "true") return;
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      const target = button.dataset.next;
+      if (target) showPage(target);
     });
+    button.dataset.navBound = "true";
+  });
 
-
-  document
-    .querySelectorAll("[data-back]")
-    .forEach(button => {
-
-      if (button.dataset.navBound === "true") {
-        return;
-      }
-
-      button.addEventListener("click", event => {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const target =
-          button.dataset.back;
-
-        if (target) {
-          showPage(target);
-        }
-
-      });
-
-      button.dataset.navBound = "true";
+  document.querySelectorAll("[data-back]").forEach(button => {
+    if (button.dataset.navBound === "true") return;
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      const target = button.dataset.back;
+      if (target) showPage(target);
     });
+    button.dataset.navBound = "true";
+  });
 
-
-  document
-    .querySelectorAll(".nav-item")
-    .forEach(button => {
-
-      if (button.dataset.navBound === "true") {
-        return;
-      }
-
-      button.addEventListener("click", event => {
-
-        event.preventDefault();
-
-        showPage(
-          button.dataset.page
-        );
-
-      });
-
-      button.dataset.navBound = "true";
+  document.querySelectorAll(".nav-item").forEach(button => {
+    if (button.dataset.navBound === "true") return;
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      if (button.dataset.page) showPage(button.dataset.page);
     });
+    button.dataset.navBound = "true";
+  });
 }
-
 
 /* =========================================================
    MOBILE MENU
 ========================================================= */
 
 function wireMobileMenu() {
-  const mobileMenu =
-    id("mobileMenu");
+  const mobileMenu = id("mobileMenu");
+  const sidebar = id("sidebar");
 
-  const sidebar =
-    id("sidebar");
-
-  if (
-    !mobileMenu ||
-    !sidebar
-  ) {
-    return;
-  }
-
-  mobileMenu.addEventListener(
-    "click",
-    () => {
+  if (mobileMenu && sidebar) {
+    mobileMenu.addEventListener("click", e => {
+      e.stopPropagation();
       sidebar.classList.toggle("open");
-    }
-  );
+    });
+
+    document.addEventListener("click", e => {
+      if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && e.target !== mobileMenu) {
+        sidebar.classList.remove("open");
+      }
+    });
+  }
 }
 
-
 /* =========================================================
-   BLOOD PRESSURE CLASSIFICATION
+   BLOOD PRESSURE CLASSIFICATION & RISK ESTIMATION
 ========================================================= */
 
 function classifyBP(sys, dia) {
-
   if (sys > 180 || dia > 120) {
     return {
       name: "Hypertensive Crisis",
       level: "danger",
-      text:
-        "🚨 HYPERTENSIVE CRISIS (SBP > 180 and/or DBP > 120 mmHg): Requires immediate emergency medical evaluation. Recheck blood pressure immediately."
+      text: "🚨 HYPERTENSIVE CRISIS (SBP > 180 and/or DBP > 120 mmHg): Requires immediate emergency medical evaluation."
     };
   }
-
   if (sys >= 140 || dia >= 90) {
     return {
       name: "Stage 2 Hypertension",
       level: "danger",
-      text:
-        "🫀 STAGE 2 HYPERTENSION (SBP ≥ 140 or DBP ≥ 90 mmHg): Prompt medical consultation for antihypertensive therapy evaluation is strongly advised."
+      text: "🫀 STAGE 2 HYPERTENSION (SBP ≥ 140 or DBP ≥ 90 mmHg): Medical consultation for antihypertensive therapy is strongly advised."
     };
   }
-
-  if (
-    (sys >= 130 && sys <= 139) ||
-    (dia >= 80 && dia <= 89)
-  ) {
+  if ((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) {
     return {
       name: "Stage 1 Hypertension",
       level: "warn",
-      text:
-        "🫀 STAGE 1 HYPERTENSION (SBP 130–139 or DBP 80–89 mmHg): Initiate structured lifestyle modifications and arrange clinical follow-up."
+      text: "🫀 STAGE 1 HYPERTENSION (SBP 130–139 or DBP 80–89 mmHg): Initiate structured lifestyle modifications and arrange clinical follow-up."
     };
   }
-
-  if (
-    sys >= 120 &&
-    sys <= 129 &&
-    dia < 80
-  ) {
+  if (sys >= 120 && sys <= 129 && dia < 80) {
     return {
       name: "Elevated BP",
       level: "warn",
-      text:
-        "🫀 ELEVATED BLOOD PRESSURE (SBP 120–129 and DBP < 80 mmHg): Adopt heart-healthy lifestyle modifications and minimize processed foods."
+      text: "🫀 ELEVATED BLOOD PRESSURE (SBP 120–129 and DBP < 80 mmHg): Adopt heart-healthy lifestyle modifications and minimize sodium intake."
     };
   }
-
   if (sys < 120 && dia < 80) {
     return {
       name: "Normal BP",
       level: "good",
-      text:
-        "✅ NORMAL BLOOD PRESSURE (SBP < 120 and DBP < 80 mmHg): Blood pressure is within the optimal range. Continue a balanced low-sodium diet and active lifestyle."
+      text: "✅ NORMAL BLOOD PRESSURE (SBP < 120 and DBP < 80 mmHg): Optimal range. Continue maintaining a balanced lifestyle."
     };
   }
 
   return {
     name: "Stage 1 Hypertension",
     level: "warn",
-    text:
-      "🫀 STAGE 1 HYPERTENSION (DBP 80–89 mmHg): Diastolic blood pressure is elevated. Reduce dietary salt and schedule clinical follow-up."
+    text: "🫀 STAGE 1 HYPERTENSION (DBP 80–89 mmHg): Diastolic pressure elevated. Schedule clinical follow-up."
   };
 }
 
+function estimateRisks({ age, bmi, sodium, exercise, smoking, alcohol, famHist, personalHist, sys, dia, waist }) {
+  const exFactor = (exercise / 3) * 0.1;
 
-/* =========================================================
-   RISK ESTIMATION
-========================================================= */
+  const probBP = Math.max(0, (sys / 180) * 0.6 + (sodium / 6000) * 0.2 + (alcohol / 2) * 0.1 + personalHist * 0.1 - exFactor);
+  const probDiab = Math.max(0, (bmi / 40) * 0.35 + (waist / 120) * 0.35 + famHist * 0.15 + personalHist * 0.15 - exFactor);
+  const probHeart = Math.max(0, probBP * 0.35 + (smoking / 2) * 0.25 + (alcohol / 2) * 0.15 + (age / 100) * 0.25 - exFactor);
+  const probStroke = Math.max(0, probBP * 0.5 + (smoking / 2) * 0.2 + (alcohol / 2) * 0.15 + (age / 100) * 0.15 - exFactor);
+  const probKidney = Math.max(0, probBP * 0.4 + probDiab * 0.3 + (sodium / 6000) * 0.15 + personalHist * 0.15);
+  const probChol = Math.max(0, (bmi / 40) * 0.3 + (waist / 120) * 0.3 + (alcohol / 2) * 0.2 + (age / 100) * 0.2 - exFactor);
 
-function estimateRisks({
-  age,
-  bmi,
-  sodium,
-  exercise,
-  smoking,
-  alcohol,
-  famHist,
-  personalHist,
-  sys,
-  dia,
-  waist
-}) {
-
-  const probBP =
-    (sys / 180) * 0.6 +
-    (sodium / 6000) * 0.2 +
-    (alcohol / 2) * 0.1 +
-    personalHist * 0.1;
-
-  const probDiab =
-    (bmi / 40) * 0.35 +
-    (waist / 120) * 0.35 +
-    famHist * 0.15 +
-    personalHist * 0.15;
-
-  const probHeart =
-    probBP * 0.35 +
-    (smoking / 2) * 0.25 +
-    (alcohol / 2) * 0.15 +
-    (age / 100) * 0.25;
-
-  const probStroke =
-    probBP * 0.5 +
-    (smoking / 2) * 0.2 +
-    (alcohol / 2) * 0.15 +
-    (age / 100) * 0.15;
-
-  const probKidney =
-    probBP * 0.4 +
-    probDiab * 0.3 +
-    (sodium / 6000) * 0.15 +
-    personalHist * 0.15;
-
-  const probChol =
-    (bmi / 40) * 0.3 +
-    (waist / 120) * 0.3 +
-    (alcohol / 2) * 0.2 +
-    (age / 100) * 0.2;
-
-  return [
-    probBP,
-    probDiab,
-    probHeart,
-    probStroke,
-    probKidney,
-    probChol
-  ].map(value =>
-    Math.max(
-      0,
-      Math.min(1, value)
-    ) * 100
-  );
+  return [probBP, probDiab, probHeart, probStroke, probKidney, probChol].map(v => Math.max(0, Math.min(1, v)) * 100);
 }
 
-
-/* =========================================================
-   PERSONALIZED RECOMMENDATIONS
-========================================================= */
-
-function generateSuggestions(
-  score,
-  sodium,
-  bmi,
-  sys,
-  dia,
-  risks
-) {
-
+function generateSuggestions(score, sodium, bmi, sys, dia, risks) {
   const suggestions = [];
-
-  const bp =
-    classifyBP(sys, dia);
+  const bp = classifyBP(sys, dia);
 
   suggestions.push({
     text: bp.text,
-    kind:
-      bp.level === "danger"
-        ? "critical"
-        : bp.level === "good"
-        ? "good"
-        : "normal"
+    kind: bp.level === "danger" ? "critical" : bp.level === "good" ? "good" : "normal"
   });
 
-
   if (score >= 50) {
-
     suggestions.push({
-      text:
-        `⚠️ DIETITIAN REFERRAL FLAG: Questionnaire score is ${score.toFixed(
-          1
-        )} (≥ 50 cutoff). The source assessment logic classifies this as high sodium intake and recommends dietitian/nutritionist referral.`,
+      text: `⚠️ DIETITIAN REFERRAL FLAG: Questionnaire score is ${score.toFixed(1)} (≥ 50 cutoff). High sodium intake detected; dietitian/nutritionist referral advised.`,
       kind: "critical"
     });
-
   } else {
-
     suggestions.push({
-      text:
-        `✅ Sodium Intake Within Limits: FFQ score is ${score.toFixed(
-          1
-        )} (< 50 cutoff). Maintain current sodium-control practices.`,
+      text: `✅ Sodium Intake Within Limits: FFQ score is ${score.toFixed(1)} (< 50 cutoff). Maintain current sodium-control practices.`,
       kind: "good"
     });
-
   }
 
-
-  if (
-    [
-      "3-4/day",
-      "5+/day"
-    ].includes(
-      state.ffq.carbs_staples
-    )
-  ) {
-
+  if (["3-4/day", "5+/day"].includes(state.ffq.carbs_staples)) {
     suggestions.push({
-      text:
-        "🍚 Carbohydrate Staples: High daily consumption of bread/grain staples detected. Review portion sizes of white rice, bun and kottu roti.",
+      text: "🍚 Carbohydrate Staples: High daily consumption of bread/grain staples detected. Review portion sizes of white rice, bun and kottu roti.",
       kind: "normal"
     });
   }
 
-
-  if (
-    [
-      "2-3x/wk",
-      "Daily"
-    ].includes(
-      state.ffq.processed_meats
-    )
-  ) {
-
+  if (["2-3x/wk", "Daily"].includes(state.ffq.processed_meats)) {
     suggestions.push({
-      text:
-        "🐟 Processed Meats & Dried Fish: High intake of sausages or dried fish (Karawala) adds sodium. Consider fresh fish or unseasoned lean protein.",
+      text: "🐟 Processed Meats & Dried Fish: High intake of sausages or dried fish (Karawala) adds excessive sodium. Consider fresh fish or unseasoned lean protein.",
       kind: "normal"
     });
   }
 
-
-  if (
-    state.ffq.salt_cooking === "Daily" ||
-    [
-      "2-3x/wk",
-      "Daily"
-    ].includes(state.ffq.salt_table)
-  ) {
-
+  if (state.ffq.salt_cooking === "Daily" || ["2-3x/wk", "Daily"].includes(state.ffq.salt_table)) {
     suggestions.push({
-      text:
-        "🧂 Salt Addition: Regular salt addition detected. Limit extra table salt and bottled sauces during food preparation.",
+      text: "🧂 Salt Addition: Regular salt addition detected. Limit extra table salt and bottled sauces during food preparation.",
       kind: "normal"
     });
   }
-
 
   if (state.stomaHas === "YES") {
-
     suggestions.push({
-      text:
-        `⚕️ Stoma Management (${state.stomaType}): Active stoma reported. Hydration and electrolyte status should be managed with clinical supervision.`,
+      text: `⚕️ Stoma Management (${state.stomaType}): Active stoma reported. Hydration and electrolyte status should be managed with clinical supervision.`,
       kind: "normal"
     });
   }
 
-
-  if (
-    bmi >= 25 ||
-    risks[1] >= 40
-  ) {
-
+  if (bmi >= 25 || risks[1] >= 40) {
     suggestions.push({
-      text:
-        `⚖️ Weight Management: BMI is ${bmi.toFixed(
-          1
-        )} kg/m². Discuss sustainable weight-management strategies with a qualified professional.`,
+      text: `⚖️ Weight Management: BMI is ${bmi.toFixed(1)} kg/m². Discuss sustainable weight-management strategies with a qualified professional.`,
       kind: "normal"
     });
   }
 
-
-  const exerciseCount = [
-    state.exVigorous,
-    state.exModerate,
-    state.exWalking
-  ].filter(
-    value => value === "Yes"
-  ).length;
-
-
+  const exerciseCount = [state.exVigorous, state.exModerate, state.exWalking].filter(v => v === "Yes").length;
   if (exerciseCount < 2) {
-
     suggestions.push({
-      text:
-        "🏃 Physical Activity Boost: Aim for at least 150 minutes of moderate physical activity per week where medically appropriate.",
+      text: "🏃 Physical Activity Boost: Aim for at least 150 minutes of moderate physical activity per week where medically appropriate.",
       kind: "normal"
     });
   }
 
-
-  if (
-    state.smoking !==
-    "Never smoked"
-  ) {
-
+  if (state.smoking !== "Never smoked") {
     suggestions.push({
-      text:
-        "🚭 Smoking: Smoking cessation is an important cardiovascular and stroke-risk reduction measure.",
+      text: "🚭 Smoking Cessation: Quitting smoking is crucial for reducing cardiovascular and stroke risks.",
       kind: "normal"
     });
   }
-
 
   return suggestions;
 }
-
 
 /* =========================================================
    VALIDATION
 ========================================================= */
 
 function validate() {
-
-  const requiredFields = [
-    ["age", "Age"],
-    ["height", "Height"],
-    ["weight", "Weight"],
-    ["sysBP", "Systolic BP"],
-    ["diaBP", "Diastolic BP"],
-    ["waist", "Waist circumference"]
+  const fieldsConfig = [
+    { fieldId: "age", label: "Age", min: 1, max: 120 },
+    { fieldId: "height", label: "Height", min: 30, max: 250 },
+    { fieldId: "weight", label: "Weight", min: 1, max: 400 },
+    { fieldId: "sysBP", label: "Systolic BP", min: 50, max: 300 },
+    { fieldId: "diaBP", label: "Diastolic BP", min: 30, max: 200 },
+    { fieldId: "waist", label: "Waist circumference", min: 30, max: 250 }
   ];
 
+  for (const item of fieldsConfig) {
+    const field = id(item.fieldId);
+    const val = field ? Number.parseFloat(field.value) : NaN;
 
-  for (const [
-    fieldId,
-    fieldName
-  ] of requiredFields) {
-
-    const field = id(fieldId);
-
-    if (
-      !field ||
-      !field.value.trim()
-    ) {
-
-      toast(
-        `Please enter ${fieldName}.`
-      );
-
+    if (!field || !field.value.trim()) {
+      toast(`Please enter ${item.label}.`);
       showPage("vitals");
+      if (field) field.focus();
+      return false;
+    }
 
-      if (field) {
-        field.focus();
-      }
-
+    if (Number.isNaN(val) || val < item.min || val > item.max) {
+      toast(`Please enter a valid ${item.label} (${item.min}-${item.max}).`);
+      showPage("vitals");
+      if (field) field.focus();
       return false;
     }
   }
@@ -1045,256 +689,103 @@ function validate() {
   return true;
 }
 
-
 /* =========================================================
    RUN ASSESSMENT
 ========================================================= */
 
 function runAssessment() {
+  if (!validate()) return;
 
-  if (!validate()) {
-    return;
-  }
+  const score = updateScore();
+  const age = Number(id("age").value) || 40;
+  const height = Number(id("height").value) || 170;
+  const weight = Number(id("weight").value) || 70;
+  const bmi = Number(id("bmi").value) || 24.2;
+  const sys = Number(id("sysBP").value) || 120;
+  const dia = Number(id("diaBP").value) || 80;
+  const waist = Number(id("waist").value) || 90;
+  const fbs = id("fbs") ? id("fbs").value : "";
 
-  const score =
-    updateScore();
+  const sodium = score * 40 + (EXTRA_SALT_MAP[state.extraSalt] || 0);
+  const exercise = [state.exVigorous, state.exModerate, state.exWalking].filter(v => v === "Yes").length;
+  const smoking = state.smoking === "Current smoker" ? 2 : state.smoking === "Former smoker" ? 1 : 0;
+  const alcoholMap = { Never: 0, Occasional: 1, "Regular/Heavy": 2 };
+  const alcohol = alcoholMap[state.alcohol] || 0;
 
-  const age =
-    Number(id("age").value) || 40;
+  const famHist = [state.famDiabetes, state.famHypertension, state.famHeart].some(v => v === "Yes") ? 1 : 0;
+  const personalHist = state.personalDiag === "Yes" ? 1 : 0;
 
-  const bmi =
-    Number(id("bmi").value) || 25;
+  const risks = estimateRisks({
+    age, bmi, sodium, exercise, smoking, alcohol, famHist, personalHist, sys, dia, waist
+  });
 
-  const sys =
-    Number(id("sysBP").value) || 120;
+  const bp = classifyBP(sys, dia);
+  const suggestions = generateSuggestions(score, sodium, bmi, sys, dia, risks);
 
-  const dia =
-    Number(id("diaBP").value) || 80;
-
-  const waist =
-    Number(id("waist").value) || 90;
-
-  const sodium =
-    score * 40 +
-    EXTRA_SALT_MAP[
-      state.extraSalt
-    ];
-
-
-  const exercise =
-    [
-      state.exVigorous,
-      state.exModerate,
-      state.exWalking
-    ].filter(
-      value => value === "Yes"
-    ).length;
-
-
-  const smoking =
-    state.smoking ===
-    "Current smoker"
-      ? 2
-      : state.smoking ===
-        "Former smoker"
-      ? 1
-      : 0;
-
-
-  const alcoholMap = {
-    Never: 0,
-    Occasional: 1,
-    "Regular/Heavy": 2
-  };
-
-  const alcohol =
-    alcoholMap[state.alcohol] || 0;
-
-
-  const famHist =
-    [
-      state.famDiabetes,
-      state.famHypertension,
-      state.famHeart
-    ].some(
-      value => value === "Yes"
-    )
-      ? 1
-      : 0;
-
-
-  const personalHist =
-    state.personalDiag === "Yes"
-      ? 1
-      : 0;
-
-
-  const risks =
-    estimateRisks({
-      age,
-      bmi,
-      sodium,
-      exercise,
-      smoking,
-      alcohol,
-      famHist,
-      personalHist,
-      sys,
-      dia,
-      waist
-    });
-
-
-  const bp =
-    classifyBP(sys, dia);
-
-
-  const suggestions =
-    generateSuggestions(
-      score,
-      sodium,
-      bmi,
-      sys,
-      dia,
-      risks
-    );
-
+  const participantInput = id("participant");
+  const pid = participantInput && participantInput.value ? participantInput.value : generatePatientId();
 
   lastReport = {
-    participant:
-      id("participant").value,
-
+    participant: pid,
     age,
-
+    height,
+    weight,
     bmi,
-
     sys,
-
     dia,
-
     waist,
-
-    fbs:
-      id("fbs").value,
-
-    gender:
-      state.gender,
-
+    fbs,
+    gender: state.gender,
     score,
-
     sodium,
-
     bp,
-
     risks,
-
     suggestions,
-
-    createdAt:
-      new Date().toISOString()
+    createdAt: new Date().toISOString()
   };
 
-
-  localStorage.setItem(
-    "clinicalAssessmentLatest",
-    JSON.stringify(lastReport)
-  );
-
-
-  localStorage.setItem(
-    "clinicalAssessmentCount",
-    String(
-      Number(
-        localStorage.getItem(
-          "clinicalAssessmentCount"
-        ) || 0
-      ) + 1
-    )
-  );
-
-
-  id("participant").value =
-    lastReport.participant;
-
-  id("patientChip").textContent =
-    lastReport.participant;
-
+  localStorage.setItem("clinicalAssessmentLatest", JSON.stringify(lastReport));
+  const count = Number(localStorage.getItem("clinicalAssessmentCount") || 0) + 1;
+  localStorage.setItem("clinicalAssessmentCount", String(count));
 
   renderResults(lastReport);
-
   showPage("results");
-
-  toast(
-    "Assessment completed and saved locally."
-  );
+  toast("Assessment completed and saved locally.");
 }
 
-
 /* =========================================================
-   RESULTS
+   RESULTS RENDERING
 ========================================================= */
 
 function renderResults(report) {
+  if (!report) return;
 
-  if (!report) {
-    return;
-  }
+  const emptyEl = id("resultsEmpty");
+  const contentEl = id("resultsContent");
 
-  id("resultsEmpty").hidden = true;
+  if (emptyEl) emptyEl.hidden = true;
+  if (contentEl) contentEl.hidden = false;
 
-  id("resultsContent").hidden = false;
+  const referral = report.score >= 50 ? "HIGH — DIETITIAN REFERRAL" : "MODERATE / LOW";
 
-
-  const referral =
-    report.score >= 50
-      ? "HIGH — DIETITIAN REFERRAL"
-      : "MODERATE / LOW";
-
-
-  id("statsGrid").innerHTML = [
-    [
-      "PARTICIPANT ID",
-      report.participant,
-      ""
-    ],
-
-    [
-      "BP CLASSIFICATION",
-      report.bp.name,
-      report.bp.level
-    ],
-
-    [
-      "FFQ SODIUM SCORE",
-      `${report.score.toFixed(1)} pts`,
-      ""
-    ],
-
-    [
-      "SODIUM RISK LEVEL",
-      referral,
-      referral.startsWith("HIGH")
-        ? "danger"
-        : "good"
+  const statsGrid = id("statsGrid");
+  if (statsGrid) {
+    statsGrid.innerHTML = [
+      ["PARTICIPANT ID", report.participant, ""],
+      ["BP CLASSIFICATION", report.bp.name, report.bp.level],
+      ["FFQ SODIUM SCORE", `${report.score.toFixed(1)} pts`, ""],
+      ["SODIUM RISK LEVEL", referral, referral.startsWith("HIGH") ? "danger" : "good"]
     ]
-  ]
-    .map(
-      item => `
+      .map(
+        item => `
         <div class="stat">
-
-          <div class="stat-label">
-            ${item[0]}
-          </div>
-
-          <div class="stat-value ${item[2]}">
-            ${item[1]}
-          </div>
-
+          <div class="stat-label">${item[0]}</div>
+          <div class="stat-value ${item[2]}">${item[1]}</div>
         </div>
       `
-    )
-    .join("");
-
+      )
+      .join("");
+  }
 
   const diseases = [
     "Hypertension",
@@ -1305,187 +796,116 @@ function renderResults(report) {
     "High Cholesterol"
   ];
 
+  const riskList = id("riskList");
+  if (riskList) {
+    riskList.innerHTML = report.risks
+      .map((risk, index) => {
+        const level = risk >= 60 ? "high" : risk >= 35 ? "medium" : "low";
+        const color = risk >= 60 ? "#b84b4b" : risk >= 35 ? "#b7791f" : "#2f806d";
 
-  id("riskList").innerHTML =
-    report.risks
-      .map(
-        (risk, index) => {
-
-          const level =
-            risk >= 60
-              ? "high"
-              : risk >= 35
-              ? "medium"
-              : "low";
-
-
-          return `
-            <div class="risk-row">
-
-              <div class="risk-top">
-
-                <span>
-                  ${diseases[index]}
-                </span>
-
-                <span class="risk-pill ${level}">
-                  ${risk.toFixed(1)}% Risk
-                </span>
-
-              </div>
-
-              <div class="risk-track">
-
-                <div
-                  class="risk-fill ${level}"
-                  style="width:${Math.min(
-                    100,
-                    risk
-                  )}%"
-                ></div>
-
-              </div>
-
+        return `
+          <div class="risk-row">
+            <div class="risk-top">
+              <span>${diseases[index]}</span>
+              <span class="risk-pill ${level}">${risk.toFixed(1)}% Risk</span>
             </div>
-          `;
-        }
-      )
-      .join("");
-
-
-  id("suggestions").innerHTML =
-    report.suggestions
-      .map(
-        suggestion => `
-          <div class="suggestion ${suggestion.kind}">
-            ${suggestion.text}
+            <div class="risk-track" style="height:5px;background:#e2e8f0;border-radius:3px;margin-top:6px;overflow:hidden">
+              <div class="risk-fill" style="width:${Math.min(100, risk)}%;height:100%;background:${color};border-radius:3px;transition:width 0.4s ease"></div>
+            </div>
           </div>
-        `
+        `;
+      })
+      .join("");
+  }
+
+  const suggestions = id("suggestions");
+  if (suggestions) {
+    suggestions.innerHTML = report.suggestions
+      .map(
+        s => `
+        <div class="suggestion ${s.kind}">
+          ${s.text}
+        </div>
+      `
       )
       .join("");
+  }
 
-
-  id("saveStatus").textContent =
-    `Assessment ${report.participant} was saved in this browser. Export CSV to create a portable record.`;
+  const saveStatus = id("saveStatus");
+  if (saveStatus) {
+    saveStatus.textContent = `Assessment ${report.participant} was saved in this browser. Export CSV to create a portable record.`;
+  }
 }
-
 
 /* =========================================================
    RESET / NEW ASSESSMENT
 ========================================================= */
 
 function resetAll() {
-
   lastReport = null;
-
   initId();
 
-
-  [
-    "age",
-    "height",
-    "weight",
-    "sysBP",
-    "diaBP",
-    "waist",
-    "fbs"
-  ].forEach(fieldId => {
-
-    const field =
-      id(fieldId);
-
-    if (field) {
-      field.value = "";
-    }
+  ["age", "height", "weight", "sysBP", "diaBP", "waist", "fbs"].forEach(fieldId => {
+    const field = id(fieldId);
+    if (field) field.value = "";
   });
 
+  const bmiField = id("bmi");
+  if (bmiField) bmiField.value = "";
 
-  id("bmi").value = "";
+  Object.assign(state, {
+    gender: "Male",
+    stomaHas: "NO",
+    stomaType: "None",
 
+    famDiabetes: "No",
+    famHypertension: "No",
+    famHeart: "No",
+    personalDiag: "No",
 
-  Object.assign(
-    state,
-    {
-      gender: "Male",
-      stomaHas: "NO",
-      stomaType: "None",
+    exVigorous: "No",
+    exModerate: "No",
+    exWalking: "No",
 
-      famDiabetes: "No",
-      famHypertension: "No",
-      famHeart: "No",
-      personalDiag: "No",
-
-      exVigorous: "No",
-      exModerate: "No",
-      exWalking: "No",
-
-      smoking: "Never smoked",
-      alcohol: "Never",
-      extraSalt: "Never"
-    }
-  );
-
+    smoking: "Never smoked",
+    alcohol: "Never",
+    extraSalt: "Never"
+  });
 
   FFQ.forEach(item => {
-    state.ffq[item.key] =
-      Object.keys(
-        item.options
-      )[0];
+    state.ffq[item.key] = Object.keys(item.options)[0];
   });
 
-
-  document
-    .querySelectorAll(".option-group")
-    .forEach(group => {
-
-      group
-        .querySelectorAll(".option")
-        .forEach(button => {
-
-          button.classList.toggle(
-            "selected",
-            button.dataset.value ===
-              state[group.dataset.name]
-          );
-
-        });
-
-    });
-
+  document.querySelectorAll(".option-group").forEach(group => {
+    const groupName = group.dataset.name;
+    if (groupName && state[groupName] !== undefined) {
+      group.querySelectorAll(".option").forEach(button => {
+        button.classList.toggle("selected", button.dataset.value === state[groupName]);
+      });
+    }
+  });
 
   renderFFQ();
-
   updateScore();
 
-  id("resultsEmpty").hidden =
-    false;
-
-  id("resultsContent").hidden =
-    true;
+  const emptyEl = id("resultsEmpty");
+  const contentEl = id("resultsContent");
+  if (emptyEl) emptyEl.hidden = false;
+  if (contentEl) contentEl.hidden = true;
 
   showPage("vitals");
-
-  toast(
-    "New assessment started."
-  );
+  toast("New assessment started.");
 }
-
 
 /* =========================================================
    CSV EXPORT
 ========================================================= */
 
 function exportCSV() {
-
   if (!lastReport) {
-
-    toast(
-      "Run an assessment first."
-    );
-
+    toast("Run an assessment first.");
     return;
   }
-
 
   const headers = [
     "Participant_ID",
@@ -1513,14 +933,13 @@ function exportCSV() {
     "Risk_High_Cholesterol_Pct"
   ];
 
-
   const row = [
     lastReport.participant,
     lastReport.createdAt,
     lastReport.age,
     lastReport.gender,
-    id("height").value,
-    id("weight").value,
+    lastReport.height,
+    lastReport.weight,
     lastReport.bmi,
     lastReport.sys,
     lastReport.dia,
@@ -1529,284 +948,101 @@ function exportCSV() {
     lastReport.bp.name,
     lastReport.score,
     lastReport.sodium,
-    lastReport.score >= 50
-      ? "YES"
-      : "NO",
+    lastReport.score >= 50 ? "YES" : "NO",
     state.stomaHas,
     state.stomaType,
     ...lastReport.risks
   ];
 
+  const escapeCSV = value => `"${String(value ?? "").replaceAll('"', '""')}"`;
+  const csv = [headers, row].map(values => values.map(escapeCSV).join(",")).join("\r\n");
 
-  const escapeCSV = value =>
-    `"${String(
-      value ?? ""
-    ).replaceAll('"', '""')}"`;
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
 
-
-  const csv = [
-    headers,
-    row
-  ]
-    .map(
-      values =>
-        values
-          .map(escapeCSV)
-          .join(",")
-    )
-    .join("\r\n");
-
-
-  const blob =
-    new Blob(
-      [csv],
-      {
-        type:
-          "text/csv;charset=utf-8"
-      }
-    );
-
-
-  const url =
-    URL.createObjectURL(blob);
-
-
-  const link =
-    document.createElement("a");
-
+  const link = document.createElement("a");
   link.href = url;
-
-  link.download =
-    `clinical_assessment_${lastReport.participant}.csv`;
+  link.download = `clinical_assessment_${lastReport.participant}.csv`;
 
   document.body.appendChild(link);
-
   link.click();
-
   link.remove();
-
   URL.revokeObjectURL(url);
 
-
-  toast(
-    "CSV exported."
-  );
+  toast("CSV exported successfully.");
 }
 
-
 /* =========================================================
-   TOAST
-========================================================= */
-
-function toast(message) {
-
-  const toastElement =
-    id("toast");
-
-  if (!toastElement) {
-    return;
-  }
-
-  toastElement.textContent =
-    message;
-
-  toastElement.classList.add(
-    "show"
-  );
-
-
-  clearTimeout(
-    window._toast
-  );
-
-
-  window._toast =
-    setTimeout(() => {
-
-      toastElement.classList.remove(
-        "show"
-      );
-
-    }, 2500);
-}
-
-
-/* =========================================================
-   BUTTON EVENT LISTENERS
+   ACTION BUTTON EVENT LISTENERS
 ========================================================= */
 
 function wireActionButtons() {
-
-  const assessmentButton =
-    id("runAssessment");
-
-  if (assessmentButton) {
-
-    assessmentButton.addEventListener(
-      "click",
-      event => {
-
-        event.preventDefault();
-
-        runAssessment();
-
-      }
-    );
-
+  const assessmentBtn = id("runAssessment");
+  if (assessmentBtn) {
+    assessmentBtn.addEventListener("click", e => {
+      e.preventDefault();
+      runAssessment();
+    });
   }
 
-
-  const newAssessmentButton =
-    id("newAssessmentBtn");
-
-  if (newAssessmentButton) {
-
-    newAssessmentButton.addEventListener(
-      "click",
-      event => {
-
-        event.preventDefault();
-
-        const confirmed =
-          confirm(
-            "Start a new assessment? Current unsaved form values will be cleared."
-          );
-
-        if (confirmed) {
-          resetAll();
-        }
-
-      }
-    );
-
-  }
-
-
-  const tryAgainButton =
-    id("tryAgainBtn");
-
-  if (tryAgainButton) {
-
-    tryAgainButton.addEventListener(
-      "click",
-      event => {
-
-        event.preventDefault();
-
+  const newAssessmentBtn = id("newAssessmentBtn");
+  if (newAssessmentBtn) {
+    newAssessmentBtn.addEventListener("click", e => {
+      e.preventDefault();
+      if (confirm("Start a new assessment? Current unsaved values will be reset.")) {
         resetAll();
-
       }
-    );
-
+    });
   }
 
+  const tryAgainBtn = id("tryAgainBtn");
+  if (tryAgainBtn) {
+    tryAgainBtn.addEventListener("click", e => {
+      e.preventDefault();
+      resetAll();
+    });
+  }
 
-  const exportButton =
-    id("exportBtn");
-
-  if (exportButton) {
-
-    exportButton.addEventListener(
-      "click",
-      event => {
-
-        event.preventDefault();
-
-        exportCSV();
-
-      }
-    );
-
+  const exportBtn = id("exportBtn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", e => {
+      e.preventDefault();
+      exportCSV();
+    });
   }
 }
 
-
 /* =========================================================
-   INITIALIZE APP
+   INITIALIZE APPLICATION
 ========================================================= */
 
 function initialiseApplication() {
-
   try {
-
     renderFFQ();
-
     wireOptionGroups();
-
     wireNavigationButtons();
-
     wireMobileMenu();
-
     wireActionButtons();
-
     attachBMIListeners();
-
     initId();
-
     updateScore();
 
-    showPage("vitals");
-
-
-    const saved =
-      localStorage.getItem(
-        "clinicalAssessmentLatest"
-      );
-
-
+    const saved = localStorage.getItem("clinicalAssessmentLatest");
     if (saved) {
-
       try {
-
-        lastReport =
-          JSON.parse(saved);
-
-        renderResults(
-          lastReport
-        );
-
-      } catch (error) {
-
-        console.warn(
-          "Saved assessment could not be loaded.",
-          error
-        );
-
+        lastReport = JSON.parse(saved);
+        renderResults(lastReport);
+      } catch (e) {
+        console.warn("Could not load saved assessment.", e);
       }
-
     }
-
   } catch (error) {
-
-    console.error(
-      "Application initialization error:",
-      error
-    );
-
-    alert(
-      "The application could not initialize correctly. Please check the browser console for details."
-    );
-
+    console.error("Initialization error:", error);
   }
 }
 
-
-/* =========================================================
-   START APPLICATION AFTER HTML LOADS
-========================================================= */
-
-if (
-  document.readyState ===
-  "loading"
-) {
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    initialiseApplication
-  );
-
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initialiseApplication);
 } else {
-
   initialiseApplication();
-
 }
