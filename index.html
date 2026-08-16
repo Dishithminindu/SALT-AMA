@@ -3,13 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Clinical Food & Health Risk Assessment — dietary, lifestyle and blood pressure assessment tool.">
-  <meta name="theme-color" content="#162a36">
-  <title>Clinical Food & Health Risk Predictor</title>
+  <meta name="description" content="HALOS — clinical food, lifestyle and health risk assessment decision-support portal.">
+  <meta name="theme-color" content="#07131d">
+  <title>HALOS | AI Clinical Health Predictor</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-shell">
+
+  <!-- =====================================================
+       HALOS STARTUP / LOADING SCREEN
+  ====================================================== -->
+  <section id="halos-loader" class="halos-loader" aria-label="HALOS loading screen">
+    <div class="loader-grid"></div>
+    <div class="loader-orbit orbit-one"></div>
+    <div class="loader-orbit orbit-two"></div>
+
+    <div class="loader-core">
+      <div class="halos-mark">
+        <span class="halos-mark-ring ring-a"></span>
+        <span class="halos-mark-ring ring-b"></span>
+        <span class="halos-mark-center">H</span>
+      </div>
+      <div class="loader-name">HALOS</div>
+      <div class="loader-tag">AI CLINICAL DECISION SUPPORT</div>
+      <div class="loader-status">
+        <span class="pulse-dot"></span>
+        Initializing health assessment environment
+      </div>
+      <div class="loader-progress"><span id="loaderProgress"></span></div>
+    </div>
+
+    <div class="loader-meta">
+      <span>LOCAL-FIRST</span>
+      <span>•</span>
+      <span>SECURE UI</span>
+      <span>•</span>
+      <span>RESEARCH / EDUCATIONAL</span>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       HALOS PUBLIC LANDING PAGE
+  ====================================================== -->
+  <section id="halos-landing" class="halos-landing" hidden>
+    <header class="landing-nav">
+      <a class="landing-brand" href="#top" aria-label="HALOS home">
+        <span class="brand-symbol">H</span>
+        <span>
+          <strong>HALOS</strong>
+          <small>AI HEALTH PORTAL</small>
+        </span>
+      </a>
+
+      <nav class="landing-links" aria-label="Main navigation">
+        <a href="#top">Home</a>
+        <a href="#about">About</a>
+        <a href="#capabilities">Capabilities</a>
+      </nav>
+
+      <button class="landing-nav-btn" id="navStartBtn" type="button">Open Predictor</button>
+    </header>
+
+    <main id="top">
+      <section class="hero-section">
+        <div class="hero-noise"></div>
+        <div class="hero-glow glow-a"></div>
+        <div class="hero-glow glow-b"></div>
+
+        <div class="hero-copy">
+          <div class="hero-kicker"><span></span> AI-SUPPORTED CLINICAL ASSESSMENT</div>
+          <h1>Smarter health decisions.<br><em>Clearer clinical insight.</em></h1>
+          <p>
+            HALOS brings dietary intake, patient measurements, lifestyle factors and structured risk estimation into one focused assessment workspace.
+          </p>
+
+          <div class="hero-actions">
+            <button class="hero-primary" id="heroStartBtn" type="button">
+              Start Assessment <span>↗</span>
+            </button>
+            <a class="hero-secondary" href="#about">Explore HALOS <span>↓</span></a>
+          </div>
+
+          <div class="hero-metrics">
+            <div><strong>04</strong><span>Assessment stages</span></div>
+            <div><strong>13</strong><span>FFQ dietary items</span></div>
+            <div><strong>06</strong><span>Risk indicators</span></div>
+          </div>
+        </div>
+
+        <div class="hero-panel" aria-hidden="true">
+          <div class="ai-panel-frame">
+            <div class="panel-topline"><span>HALOS / PREDICTOR CORE</span><span>ONLINE</span></div>
+            <div class="scan-field">
+              <div class="scan-ring ring-1"></div>
+              <div class="scan-ring ring-2"></div>
+              <div class="scan-ring ring-3"></div>
+              <div class="scan-center"><span>H</span></div>
+              <i class="node node-a"></i><i class="node node-b"></i><i class="node node-c"></i>
+              <i class="node node-d"></i><i class="node node-e"></i>
+            </div>
+            <div class="signal-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="panel-readout"><span>MODEL STATE</span><strong>READY</strong></div>
+            <div class="panel-readout"><span>DATA MODE</span><strong>LOCAL</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="intro-section">
+        <div class="section-label">ABOUT HALOS</div>
+        <div>
+          <h2>A focused interface for structured health assessment.</h2>
+          <p>
+            Inspired by the visual language of your existing Amasha landing page and the clinical dashboard, this version keeps the public-facing experience elegant while making the predictor itself feel like a dedicated AI product.
+          </p>
+        </div>
+      </section>
+
+      <section id="capabilities" class="capabilities-section">
+        <div class="section-label">CAPABILITIES</div>
+        <div class="capability-grid">
+          <article><span>01</span><h3>Clinical profile</h3><p>Capture baseline measurements, blood pressure, BMI and participant information.</p></article>
+          <article><span>02</span><h3>Dietary intake</h3><p>Record the structured food-frequency questionnaire and calculate its score in real time.</p></article>
+          <article><span>03</span><h3>Lifestyle context</h3><p>Combine family history, physical activity, smoking, alcohol and salt-related factors.</p></article>
+          <article><span>04</span><h3>Risk insight</h3><p>Present estimated risk indicators and a personalized action-oriented assessment summary.</p></article>
+        </div>
+      </section>
+
+      <section class="cta-section">
+        <div>
+          <span class="section-label">READY WHEN YOU ARE</span>
+          <h2>Open the HALOS assessment workspace.</h2>
+        </div>
+        <button class="hero-primary" id="ctaStartBtn" type="button">Let's Check <span>→</span></button>
+      </section>
+    </main>
+
+    <footer class="landing-footer">
+      <span>HALOS — AI Clinical Health Predictor</span>
+      <span>Educational / decision-support use • Not a medical diagnosis</span>
+    </footer>
+  </section>
+
+  <!-- =====================================================
+       CLINICAL ASSESSMENT APP
+  ====================================================== -->
+  <div id="assessment-app-root" hidden>
+<div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-title">CLINICAL</div>
@@ -250,8 +389,52 @@
     </main>
   </div>
 
+    </div>
+
   <div class="toast" id="toast"></div>
   <script src="script.js"></script>
+  <script>
+    (function(){
+      const loader = document.getElementById("halos-loader");
+      const landing = document.getElementById("halos-landing");
+      const app = document.getElementById("assessment-app-root");
+      const progress = document.getElementById("loaderProgress");
+      const startButtons = [
+        document.getElementById("navStartBtn"),
+        document.getElementById("heroStartBtn"),
+        document.getElementById("ctaStartBtn")
+      ].filter(Boolean);
+
+      let value = 0;
+      const timer = setInterval(function(){
+        value += Math.floor(Math.random() * 8) + 5;
+        if(value >= 100){ value = 100; clearInterval(timer); }
+        if(progress) progress.style.width = value + "%";
+      }, 90);
+
+      setTimeout(function(){
+        if(loader) loader.classList.add("is-complete");
+        setTimeout(function(){
+          if(loader) loader.hidden = true;
+          if(landing) landing.hidden = false;
+          requestAnimationFrame(function(){ landing.classList.add("is-visible"); });
+        }, 600);
+      }, 2500);
+
+      function openAssessment(){
+        if(landing) landing.classList.add("is-exiting");
+        setTimeout(function(){
+          if(landing) landing.hidden = true;
+          if(app) app.hidden = false;
+          window.scrollTo({top:0, behavior:"smooth"});
+          document.body.classList.add("assessment-open");
+          const vitals = document.getElementById("page-vitals");
+          if(vitals) vitals.classList.add("active");
+        }, 420);
+      }
+
+      startButtons.forEach(function(btn){ btn.addEventListener("click", openAssessment); });
+    })();
+  </script>
 </body>
 </html>
-
