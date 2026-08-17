@@ -3,438 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="HALOS — clinical food, lifestyle and health risk assessment decision-support portal.">
-  <meta name="theme-color" content="#07131d">
-  <title>HALOS | AI Clinical Health Predictor</title>
+  <title>Sri Lanka 24-Hour Dietary Recall System</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- =====================================================
-       HALOS STARTUP / LOADING SCREEN
-  ====================================================== -->
-  <section id="halos-loader" class="halos-loader" aria-label="HALOS loading screen">
-    <div class="loader-grid"></div>
-    <div class="loader-orbit orbit-one"></div>
-    <div class="loader-orbit orbit-two"></div>
-
-    <div class="loader-core">
-      <div class="halos-mark">
-        <span class="halos-mark-ring ring-a"></span>
-        <span class="halos-mark-ring ring-b"></span>
-        <span class="halos-mark-center">H</span>
+  <!-- Top Header Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div>
+        <h1>Sri Lanka 24-Hour Dietary Recall System</h1>
+        <p>Intake24 Protocol Engine &bull; 242 Pre-Loaded Local Foods</p>
       </div>
-      <div class="loader-name">HALOS</div>
-      <div class="loader-tag">AI CLINICAL DECISION SUPPORT</div>
-      <div class="loader-status">
-        <span class="pulse-dot"></span>
-        Initializing health assessment environment
+      <div class="stats-badge">
+        <span id="totalItemsLoggedCount">0 Items Logged</span>
       </div>
-      <div class="loader-progress"><span id="loaderProgress"></span></div>
     </div>
+  </header>
 
-    <div class="loader-meta">
-      <span>LOCAL-FIRST</span>
-      <span>•</span>
-      <span>SECURE UI</span>
-      <span>•</span>
-      <span>RESEARCH / EDUCATIONAL</span>
+  <main class="main-wrapper">
+    <div class="content-grid">
+      
+      <!-- Left Column: Search & Food Selection Catalog -->
+      <section class="card catalog-card">
+        <h2>1. Search & Select Food Items</h2>
+
+        <div class="filter-bar">
+          <input 
+            type="text" 
+            id="searchInput" 
+            class="input-search" 
+            placeholder="Type food name (e.g. Red Rice, Kottu, Dhal, Hopper, Sambol)..." 
+            oninput="handleFilter()"
+          >
+          <select id="categoryFilter" class="select-category" onchange="handleFilter()">
+            <option value="All">All Categories</option>
+            <option value="Rice, Starch & Bakery">Rice, Starch & Bakery</option>
+            <option value="Curries, Pulses & Vegetables">Curries, Pulses & Vegetables</option>
+            <option value="Meat, Fish & Eggs">Meat, Fish & Eggs</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Dairy & Desserts">Dairy & Desserts</option>
+            <option value="Condiments, Nuts & Sweets">Condiments, Nuts & Sweets</option>
+            <option value="Beverages">Beverages</option>
+          </select>
+        </div>
+
+        <div class="catalog-info">
+          <span>Showing <strong id="catalogCount">0</strong> items</span>
+        </div>
+
+        <div class="food-grid" id="foodGrid">
+          <!-- Food cards dynamically rendered by app.js -->
+        </div>
+      </section>
+
+      <!-- Right Column: Meal Recall Log & Live Nutrition Totals -->
+      <section class="sidebar-section">
+        
+        <!-- Log Summary -->
+        <div class="card log-card">
+          <h2>2. 24-Hour Consumption Log</h2>
+          <div id="recallLog" class="log-container">
+            <div class="empty-state">
+              <p>No food or drink items logged yet.</p>
+              <small>Click any food item on the left to begin your 24-hour recall.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro Summary Card -->
+        <div class="card nutrition-card">
+          <h2>Daily Macro Totals</h2>
+          <hr class="divider">
+          
+          <div class="macro-row highlight">
+            <span>Total Energy:</span>
+            <strong id="totalKcal">0 kcal</strong>
+          </div>
+          <div class="macro-row">
+            <span>Carbohydrates:</span>
+            <strong id="totalCarbs">0.0 g</strong>
+          </div>
+          <div class="macro-row">
+            <span>Proteins:</span>
+            <strong id="totalProtein">0.0 g</strong>
+          </div>
+          <div class="macro-row">
+            <span>Fats:</span>
+            <strong id="totalFat">0.0 g</strong>
+          </div>
+        </div>
+
+      </section>
     </div>
-  </section>
+  </main>
 
-  <!-- =====================================================
-       HALOS PUBLIC LANDING PAGE
-  ====================================================== -->
-  <section id="halos-landing" class="halos-landing" hidden>
-    <header class="landing-nav">
-      <a class="landing-brand" href="#top" aria-label="HALOS home">
-        <span class="brand-symbol">H</span>
-        <span>
-          <strong>HALOS</strong>
-          <small>AI HEALTH PORTAL</small>
-        </span>
-      </a>
-
-      <nav class="landing-links" aria-label="Main navigation">
-        <a href="#top">Home</a>
-        <a href="#about">About</a>
-        <a href="#capabilities">Capabilities</a>
-      </nav>
-
-      <button class="landing-nav-btn" id="navStartBtn" type="button">Open Predictor</button>
-    </header>
-
-    <main id="top">
-      <section class="hero-section">
-        <div class="hero-noise"></div>
-        <div class="hero-glow glow-a"></div>
-        <div class="hero-glow glow-b"></div>
-
-        <div class="hero-copy">
-          <div class="hero-kicker"><span></span> AI-SUPPORTED CLINICAL ASSESSMENT</div>
-          <h1>Smarter health decisions.<br><em>Clearer clinical insight.</em></h1>
-          <p>
-            HALOS brings dietary intake, patient measurements, lifestyle factors and structured risk estimation into one focused assessment workspace.
-          </p>
-
-          <div class="hero-actions">
-            <button class="hero-primary" id="heroStartBtn" type="button">
-              Start Assessment <span>↗</span>
-            </button>
-            <a class="hero-secondary" href="#about">Explore HALOS <span>↓</span></a>
-          </div>
-
-          <div class="hero-metrics">
-            <div><strong>04</strong><span>Assessment stages</span></div>
-            <div><strong>13</strong><span>FFQ dietary items</span></div>
-            <div><strong>06</strong><span>Risk indicators</span></div>
-          </div>
-        </div>
-
-        <div class="hero-panel" aria-hidden="true">
-          <div class="ai-panel-frame">
-            <div class="panel-topline"><span>HALOS / PREDICTOR CORE</span><span>ONLINE</span></div>
-            <div class="scan-field">
-              <div class="scan-ring ring-1"></div>
-              <div class="scan-ring ring-2"></div>
-              <div class="scan-ring ring-3"></div>
-              <div class="scan-center"><span>H</span></div>
-              <i class="node node-a"></i><i class="node node-b"></i><i class="node node-c"></i>
-              <i class="node node-d"></i><i class="node node-e"></i>
-            </div>
-            <div class="signal-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            <div class="panel-readout"><span>MODEL STATE</span><strong>READY</strong></div>
-            <div class="panel-readout"><span>DATA MODE</span><strong>LOCAL</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="about" class="intro-section">
-        <div class="section-label">ABOUT HALOS</div>
-        <div>
-          <h2>A focused interface for structured health assessment.</h2>
-          <p>
-            Inspired by the visual language of your existing Amasha landing page and the clinical dashboard, this version keeps the public-facing experience elegant while making the predictor itself feel like a dedicated AI product.
-          </p>
-        </div>
-      </section>
-
-      <section id="capabilities" class="capabilities-section">
-        <div class="section-label">CAPABILITIES</div>
-        <div class="capability-grid">
-          <article><span>01</span><h3>Clinical profile</h3><p>Capture baseline measurements, blood pressure, BMI and participant information.</p></article>
-          <article><span>02</span><h3>Dietary intake</h3><p>Record the structured food-frequency questionnaire and calculate its score in real time.</p></article>
-          <article><span>03</span><h3>Lifestyle context</h3><p>Combine family history, physical activity, smoking, alcohol and salt-related factors.</p></article>
-          <article><span>04</span><h3>Risk insight</h3><p>Present estimated risk indicators and a personalized action-oriented assessment summary.</p></article>
-        </div>
-      </section>
-
-      <section class="cta-section">
-        <div>
-          <span class="section-label">READY WHEN YOU ARE</span>
-          <h2>Open the HALOS assessment workspace.</h2>
-        </div>
-        <button class="hero-primary" id="ctaStartBtn" type="button">Let's Check <span>→</span></button>
-      </section>
-    </main>
-
-    <footer class="landing-footer">
-      <span>HALOS — AI Clinical Health Predictor</span>
-      <span>Educational / decision-support use • Not a medical diagnosis</span>
-    </footer>
-  </section>
-
-  <!-- =====================================================
-       CLINICAL ASSESSMENT APP
-  ====================================================== -->
-  <div id="assessment-app-root" hidden>
-<div class="app-shell">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-title">CLINICAL</div>
-        <div class="brand-subtitle">FOOD &amp; HEALTH</div>
+  <!-- Visual Portion & Meal Selection Modal -->
+  <div class="modal-backdrop" id="portionModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 id="modalFoodTitle">Select Portion Size</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
       </div>
 
-      <nav class="step-nav" aria-label="Assessment sections">
-        <button class="nav-item active" data-page="vitals">
-          <span class="nav-number">01</span><span>Patient Profile</span>
-        </button>
-        <button class="nav-item" data-page="meals">
-          <span class="nav-number">02</span><span>FFQ Dietary Intake</span>
-        </button>
-        <button class="nav-item" data-page="lifestyle">
-          <span class="nav-number">03</span><span>History &amp; Lifestyle</span>
-        </button>
-        <button class="nav-item" data-page="results">
-          <span class="nav-number">04</span><span>Assessment Results</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="status-dot"></div>
-        <span>Local browser application</span>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
-        <div>
-          <h1 id="pageTitle">Patient Profile</h1>
-          <p id="pageSubtitle">Demographics and baseline clinical measurements</p>
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label for="mealOccasion"><strong>Meal / Time Occasion:</strong></label>
+          <select id="mealOccasion" class="input-select">
+            <option value="Breakfast">Breakfast (8:00 AM)</option>
+            <option value="Mid-Morning Snack">Mid-Morning Snack (10:30 AM)</option>
+            <option value="Lunch">Lunch (1:30 PM)</option>
+            <option value="Afternoon Tea">Afternoon Tea / Snack (4:30 PM)</option>
+            <option value="Dinner">Dinner (8:00 PM)</option>
+            <option value="Late Night Snack">Late Night Snack (10:30 PM)</option>
+          </select>
         </div>
-        <div class="topbar-actions">
-          <span class="patient-chip" id="patientChip">PID-0001</span>
-          <button class="ghost-btn" id="newAssessmentBtn">New Assessment</button>
-        </div>
-      </header>
 
-      <div class="progress-wrap">
-        <div class="progress-line"><span id="progressBar"></span></div>
-        <span id="progressText">Step 1 of 3</span>
+        <p class="section-sublabel">Select Portion Size Descriptor:</p>
+        <div class="portion-list" id="portionList">
+          <!-- Portion options populated dynamically -->
+        </div>
+
+        <div class="form-group inline-group">
+          <label for="portionQty"><strong>Number of Servings:</strong></label>
+          <input type="number" id="portionQty" min="0.25" max="10" step="0.25" value="1.0" class="input-number">
+        </div>
+
       </div>
 
-      <section class="page active" id="page-vitals">
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <span class="eyebrow">01 / PATIENT PROFILE</span>
-              <h2>Baseline measurements</h2>
-              <p>Enter the participant's demographic and clinical measurements.</p>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <label class="field">
-              <span>Participant ID <small>Auto-generated</small></span>
-              <input id="participant" type="text" readonly>
-            </label>
-            <label class="field">
-              <span>Age <small>years</small></span>
-              <input id="age" type="number" min="1" max="120" inputmode="numeric" placeholder="e.g. 40">
-            </label>
-
-            <div class="field">
-              <span>Gender</span>
-              <div class="option-group" data-name="gender">
-                <button class="option selected" data-value="Male">Male</button>
-                <button class="option" data-value="Female">Female</button>
-              </div>
-            </div>
-            <label class="field">
-              <span>Height <small>cm</small></span>
-              <input id="height" type="number" min="30" max="250" step="0.1" placeholder="e.g. 170">
-            </label>
-
-            <label class="field">
-              <span>Weight <small>kg</small></span>
-              <input id="weight" type="number" min="1" max="400" step="0.1" placeholder="e.g. 70">
-            </label>
-            <label class="field">
-              <span>Calculated BMI</span>
-              <input id="bmi" type="text" readonly placeholder="Calculated automatically">
-            </label>
-
-            <label class="field">
-              <span>Systolic BP <small>mmHg</small></span>
-              <input id="sysBP" type="number" min="50" max="300" step="1" placeholder="e.g. 120">
-            </label>
-            <label class="field">
-              <span>Diastolic BP <small>mmHg</small></span>
-              <input id="diaBP" type="number" min="30" max="200" step="1" placeholder="e.g. 80">
-            </label>
-
-            <label class="field">
-              <span>Waist Circumference <small>cm</small></span>
-              <input id="waist" type="number" min="30" max="250" step="0.1" placeholder="e.g. 90">
-            </label>
-            <label class="field">
-              <span>Fasting Blood Sugar <small>mg/dL</small></span>
-              <input id="fbs" type="number" min="20" max="600" step="0.1" placeholder="e.g. 95">
-            </label>
-          </div>
-
-          <div class="info-banner">
-            <span class="info-icon">i</span>
-            <div><strong>Data quality</strong><br>Use measured values where available. BMI is calculated from height and weight.</div>
-          </div>
-        </div>
-        <div class="bottom-bar">
-          <button class="primary-btn" data-next="meals">Continue <span>→</span></button>
-        </div>
-      </section>
-
-      <section class="page" id="page-meals">
-        <div class="card ffq-card">
-          <div class="card-header">
-            <div>
-              <span class="eyebrow">02 / FFQ DIETARY INTAKE</span>
-              <h2>Food frequency questionnaire</h2>
-              <p>Select one frequency/portion option for every item.</p>
-            </div>
-            <div class="score-preview">FFQ score <strong id="liveScore">0.0</strong></div>
-          </div>
-
-          <div id="ffqContainer"></div>
-
-          <div class="subsection">
-            <div class="section-band">5. ADDITIONAL CLINICAL QUESTIONS — STOMA ASSESSMENT</div>
-            <div class="stoma-box">
-              <div class="question-title">Does the patient have a stoma (Ileostomy or Colostomy)?</div>
-              <div class="stoma-grid">
-                <div>
-                  <span class="mini-label">Stoma Present</span>
-                  <div class="option-group compact" data-name="stomaHas">
-                    <button class="option selected" data-value="NO">NO</button>
-                    <button class="option" data-value="YES">YES</button>
-                  </div>
-                </div>
-                <div>
-                  <span class="mini-label">Specify Type</span>
-                  <div class="option-group compact" data-name="stomaType">
-                    <button class="option selected" data-value="None">None</button>
-                    <button class="option" data-value="Ileostomy">Ileostomy</button>
-                    <button class="option" data-value="Colostomy">Colostomy</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="bottom-bar">
-          <button class="secondary-btn" data-back="vitals">← Back</button>
-          <button class="primary-btn" data-next="lifestyle">Continue <span>→</span></button>
-        </div>
-      </section>
-
-      <section class="page" id="page-lifestyle">
-        <div class="lifestyle-grid">
-          <div class="card">
-            <div class="card-header small">
-              <div><span class="eyebrow">MEDICAL HISTORY</span><h2>Medical &amp; family history</h2></div>
-            </div>
-            <div class="stack-fields">
-              <div class="field"><span>Family diabetes</span><div class="option-group" data-name="famDiabetes"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
-              <div class="field"><span>Family hypertension</span><div class="option-group" data-name="famHypertension"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
-              <div class="field"><span>Family heart disease</span><div class="option-group" data-name="famHeart"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
-              <div class="field"><span>Personal prior diagnosis</span><div class="option-group" data-name="personalDiag"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header small">
-              <div><span class="eyebrow">LIFESTYLE</span><h2>Lifestyle factors</h2></div>
-            </div>
-            <div class="stack-fields">
-              <div class="field"><span>Vigorous exercise</span><div class="option-group" data-name="exVigorous"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
-              <div class="field"><span>Moderate exercise</span><div class="option-group" data-name="exModerate"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
-              <div class="field"><span>Walking exercise</span><div class="option-group" data-name="exWalking"><button class="option selected" data-value="No">No</button><button class="option" data-value="Yes">Yes</button></div></div>
-              <div class="field"><span>Smoking status</span><div class="option-group wrap-options" data-name="smoking"><button class="option selected" data-value="Never smoked">Never smoked</button><button class="option" data-value="Former smoker">Former smoker</button><button class="option" data-value="Current smoker">Current smoker</button></div></div>
-              <div class="field"><span>Alcohol consumption</span><div class="option-group wrap-options" data-name="alcohol"><button class="option selected" data-value="Never">Never</button><button class="option" data-value="Occasional">Occasional</button><button class="option" data-value="Regular/Heavy">Regular/Heavy</button></div></div>
-              <div class="field"><span>Extra salt added</span><div class="option-group wrap-options" data-name="extraSalt"><button class="option selected" data-value="Never">Never</button><button class="option" data-value="Rarely">Rarely</button><button class="option" data-value="Sometimes">Sometimes</button><button class="option" data-value="Often">Often</button><button class="option" data-value="Always">Always</button></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="bottom-bar">
-          <button class="secondary-btn" data-back="meals">← Back</button>
-          <button class="primary-btn" id="runAssessment">Run Assessment &amp; Save <span>→</span></button>
-        </div>
-      </section>
-
-      <section class="page" id="page-results">
-        <div id="resultsEmpty" class="card empty-results">
-          <div class="empty-icon">⌁</div>
-          <h2>No assessment run yet</h2>
-          <p>Complete the first three sections and run the assessment to see the results.</p>
-          <button class="primary-btn" data-next="vitals">Start Assessment</button>
-        </div>
-
-        <div id="resultsContent" hidden>
-          <div class="stats-grid" id="statsGrid"></div>
-
-          <div class="results-grid">
-            <div class="card">
-              <div class="card-header small">
-                <div><span class="eyebrow">RISK PROFILE</span><h2>Estimated disease risks</h2></div>
-              </div>
-              <div id="riskList" class="risk-list"></div>
-              <div class="result-note">Risk values are estimates generated from the assessment logic and are not a diagnosis.</div>
-            </div>
-
-            <div class="card">
-              <div class="card-header small">
-                <div><span class="eyebrow">HEALTHCARE COMPANION</span><h2>Personalized action plan</h2><p>Recommendations based on the entered measurements, FFQ responses and lifestyle factors.</p></div>
-              </div>
-              <div id="suggestions" class="suggestions"></div>
-            </div>
-          </div>
-
-          <div class="card result-footer-card">
-            <div>
-              <strong>Assessment saved locally</strong>
-              <p id="saveStatus">This browser stores the latest assessment and can export records as CSV.</p>
-            </div>
-            <div class="result-actions">
-              <button class="secondary-btn" id="exportBtn">Export CSV</button>
-              <button class="primary-btn" id="tryAgainBtn">↻ Start New Assessment</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer class="site-footer">
-        <span>Clinical Food &amp; Health Assessment</span>
-        <span>For research/educational decision support — not a substitute for professional medical diagnosis.</span>
-      </footer>
-    </main>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddFood()">Add to Recall Log</button>
+      </div>
+    </div>
   </div>
 
-    </div>
-
-  <div class="toast" id="toast"></div>
-  <script src="script.js"></script>
-  <script>
-    (function(){
-      const loader = document.getElementById("halos-loader");
-      const landing = document.getElementById("halos-landing");
-      const app = document.getElementById("assessment-app-root");
-      const progress = document.getElementById("loaderProgress");
-      const startButtons = [
-        document.getElementById("navStartBtn"),
-        document.getElementById("heroStartBtn"),
-        document.getElementById("ctaStartBtn")
-      ].filter(Boolean);
-
-      let value = 0;
-      const timer = setInterval(function(){
-        value += Math.floor(Math.random() * 8) + 5;
-        if(value >= 100){ value = 100; clearInterval(timer); }
-        if(progress) progress.style.width = value + "%";
-      }, 90);
-
-      setTimeout(function(){
-        if(loader) loader.classList.add("is-complete");
-        setTimeout(function(){
-          if(loader) loader.hidden = true;
-          if(landing) landing.hidden = false;
-          requestAnimationFrame(function(){ landing.classList.add("is-visible"); });
-        }, 600);
-      }, 2500);
-
-      function openAssessment(){
-        if(landing) landing.classList.add("is-exiting");
-        setTimeout(function(){
-          if(landing) landing.hidden = true;
-          if(app) app.hidden = false;
-          window.scrollTo({top:0, behavior:"smooth"});
-          document.body.classList.add("assessment-open");
-          const vitals = document.getElementById("page-vitals");
-          if(vitals) vitals.classList.add("active");
-        }, 420);
-      }
-
-      startButtons.forEach(function(btn){ btn.addEventListener("click", openAssessment); });
-    })();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
